@@ -17,7 +17,7 @@
 #include "recoveryImage.h"
 #include "drivers/PinMap.h"
 
-#include "displayapp/icons/infinitime/infinitime-nb.c"
+//#include "displayapp/icons/infinitime/infinitime-nb.c"
 #include "components/rle/RleDecoder.h"
 
 #if NRF_LOG_ENABLED

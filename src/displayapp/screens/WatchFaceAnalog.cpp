@@ -8,7 +8,7 @@
 #include "components/settings/Settings.h"
 #include "displayapp/InfiniTimeTheme.h"
 
-LV_IMG_DECLARE(bg_clock);
+//LV_IMG_DECLARE(bg_clock);
 
 using namespace Pinetime::Applications::Screens;
 

@@ -20,9 +20,9 @@
 #include <cstdint>
 #include "displayapp/DisplayApp.h"
 #include "components/ble/MusicService.h"
-#include "displayapp/icons/music/disc.c"
-#include "displayapp/icons/music/disc_f_1.c"
-#include "displayapp/icons/music/disc_f_2.c"
+//#include "displayapp/icons/music/disc.c"
+//#include "displayapp/icons/music/disc_f_1.c"
+//#include "displayapp/icons/music/disc_f_2.c"
 
 using namespace Pinetime::Applications::Screens;
 
@@ -128,6 +128,7 @@ Music::Music(Pinetime::Applications::DisplayApp* app, Pinetime::Controllers::Mus
   lv_label_set_text_static(txtTrack, "This is a very long getTrack name");
 
   /** Init animation */
+  /*
   imgDisc = lv_img_create(lv_scr_act(), nullptr);
   lv_img_set_src_arr(imgDisc, &disc);
   lv_obj_align(imgDisc, nullptr, LV_ALIGN_IN_TOP_RIGHT, -15, 15);
@@ -135,6 +136,7 @@ Music::Music(Pinetime::Applications::DisplayApp* app, Pinetime::Controllers::Mus
   imgDiscAnim = lv_img_create(lv_scr_act(), nullptr);
   lv_img_set_src_arr(imgDiscAnim, &disc_f_1);
   lv_obj_align(imgDiscAnim, nullptr, LV_ALIGN_IN_TOP_RIGHT, -15 - 32, 15);
+  */
 
   frameB = false;
 
@@ -182,12 +184,14 @@ void Music::Refresh() {
     lv_label_set_text_static(txtPlayPause, Symbols::pause);
     if (xTaskGetTickCount() - 1024 >= lastIncrement) {
 
+      /*
       if (frameB) {
         lv_img_set_src(imgDiscAnim, &disc_f_1);
       } else {
         lv_img_set_src(imgDiscAnim, &disc_f_2);
       }
       frameB = !frameB;
+      */
 
       if (currentPosition >= totalLength) {
         // Let's assume the getTrack finished, paused when the timer ends

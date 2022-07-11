@@ -69,16 +69,16 @@ WatchFacePineTimeStyle::WatchFacePineTimeStyle(DisplayApp* app,
 
   // Display the time
   timeDD1 = lv_label_create(lv_scr_act(), nullptr);
-  lv_obj_set_style_local_text_font(timeDD1, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &open_sans_light);
+  lv_obj_set_style_local_text_font(timeDD1, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
   lv_obj_set_style_local_text_color(timeDD1, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Convert(settingsController.GetPTSColorTime()));
   lv_label_set_text_static(timeDD1, "00");
-  lv_obj_align(timeDD1, timebar, LV_ALIGN_IN_TOP_MID, 5, 5);
+  lv_obj_align(timeDD1, timebar, LV_ALIGN_CENTER, 0, -25);
 
   timeDD2 = lv_label_create(lv_scr_act(), nullptr);
-  lv_obj_set_style_local_text_font(timeDD2, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &open_sans_light);
+  lv_obj_set_style_local_text_font(timeDD2, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
   lv_obj_set_style_local_text_color(timeDD2, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Convert(settingsController.GetPTSColorTime()));
   lv_label_set_text_static(timeDD2, "00");
-  lv_obj_align(timeDD2, timebar, LV_ALIGN_IN_BOTTOM_MID, 5, -5);
+  lv_obj_align(timeDD2, timebar, LV_ALIGN_CENTER, 0, 25);
 
   timeAMPM = lv_label_create(lv_scr_act(), nullptr);
   lv_obj_set_style_local_text_color(timeAMPM, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Convert(settingsController.GetPTSColorTime()));

@@ -5,7 +5,7 @@
 #include "components/fs/FS.h"
 #include "components/rle/RleDecoder.h"
 #include "touchhandler/TouchHandler.h"
-#include "displayapp/icons/infinitime/infinitime-nb.c"
+//#include "displayapp/icons/infinitime/infinitime-nb.c"
 #include "components/ble/BleController.h"
 
 using namespace Pinetime::Applications;
@@ -93,12 +93,14 @@ void DisplayApp::Refresh() {
 }
 
 void DisplayApp::DisplayLogo(uint16_t color) {
+  /*
   Pinetime::Tools::RleDecoder rleDecoder(infinitime_nb, sizeof(infinitime_nb), color, colorBlack);
   for (int i = 0; i < displayWidth; i++) {
     rleDecoder.DecodeNext(displayBuffer, displayWidth * bytesPerPixel);
     ulTaskNotifyTake(pdTRUE, 500);
     lcd.DrawBuffer(0, i, displayWidth, 1, reinterpret_cast<const uint8_t*>(displayBuffer), displayWidth * bytesPerPixel);
   }
+  */
 }
 
 void DisplayApp::DisplayOtaProgress(uint8_t percent, uint16_t color) {

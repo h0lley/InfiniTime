@@ -15,6 +15,7 @@
 #include "displayapp/screens/Screen.h"
 #include "components/timer/TimerController.h"
 #include "components/alarm/AlarmController.h"
+#include "components/holly/ReminderController.h"
 #include "touchhandler/TouchHandler.h"
 
 #include "displayapp/Messages.h"
@@ -61,6 +62,7 @@ namespace Pinetime {
                  Pinetime::Controllers::MotionController& motionController,
                  Pinetime::Controllers::TimerController& timerController,
                  Pinetime::Controllers::AlarmController& alarmController,
+                 Pinetime::Controllers::ReminderController& reminderController,
                  Pinetime::Controllers::BrightnessController& brightnessController,
                  Pinetime::Controllers::TouchHandler& touchHandler,
                  Pinetime::Controllers::FS& filesystem);
@@ -72,6 +74,16 @@ namespace Pinetime {
       void SetFullRefresh(FullRefreshDirections direction);
 
       void Register(Pinetime::System::SystemTask* systemTask);
+
+      struct HollyState {
+        bool enabled = false;
+        uint8_t current_exercise = 0;
+        uint8_t current_set = 0;
+        bool reminder_enabled = false;
+        uint8_t today;
+        uint8_t todays_exercise_done_count = 0;
+        uint8_t todays_reminder_dismissal_count = 0;
+      } hollyState;
 
     private:
       Pinetime::Drivers::St7789& lcd;
@@ -89,6 +101,7 @@ namespace Pinetime {
       Pinetime::Controllers::MotionController& motionController;
       Pinetime::Controllers::TimerController& timerController;
       Pinetime::Controllers::AlarmController& alarmController;
+      Pinetime::Controllers::ReminderController& reminderController;
       Pinetime::Controllers::BrightnessController& brightnessController;
       Pinetime::Controllers::TouchHandler& touchHandler;
       Pinetime::Controllers::FS& filesystem;

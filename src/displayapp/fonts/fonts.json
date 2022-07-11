@@ -1,4 +1,24 @@
 {
+   "jetbrains_mono_extrabold_compressed": {
+      "sources": [
+         {
+            "file": "JetBrainsMono-ExtraBold.ttf",
+            "range": "0x30-0x3a"
+         }
+      ],
+      "bpp": 1,
+      "size": 60
+   },
+   "lv_font_sys_80": {
+      "sources": [
+         {
+            "file": "icons_sys_48.ttf",
+            "range": "0xe902, 0xe904-0xe907, 0xe90b-0xe90c"
+         }
+      ],
+      "bpp": 1,
+      "size": 80
+   },
    "jetbrains_mono_bold_20": {
       "sources": [
          {
@@ -33,16 +53,6 @@
       ],
       "bpp": 1,
       "size": 76
-   },
-   "jetbrains_mono_extrabold_compressed": {
-      "sources": [
-         {
-            "file": "JetBrainsMono-ExtraBold.ttf",
-            "range": "0x30-0x3a"
-         }
-      ],
-      "bpp": 1,
-      "size": 80
    },
    "open_sans_light": {
       "sources": [

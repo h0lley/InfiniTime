@@ -366,6 +366,9 @@ set(QCBOR_SRC
 
 list(APPEND IMAGE_FILES
         displayapp/icons/battery/batteryicon.c
+        displayapp/screens/holly/images/glurak1.c
+        displayapp/screens/holly/images/glurak2.c
+        displayapp/screens/holly/images/fionna.c
         )
 list(APPEND SOURCE_FILES
         BootloaderVersion.cpp
@@ -424,7 +427,7 @@ list(APPEND SOURCE_FILES
         displayapp/screens/settings/SettingBluetooth.cpp
 
         ## Watch faces
-        displayapp/icons/bg_clock.c
+        #displayapp/icons/bg_clock.c
         displayapp/screens/WatchFaceAnalog.cpp
         displayapp/screens/WatchFaceDigital.cpp
         displayapp/screens/WatchFaceInfineat.cpp
@@ -473,6 +476,7 @@ list(APPEND SOURCE_FILES
         components/settings/Settings.cpp
         components/timer/TimerController.cpp
         components/alarm/AlarmController.cpp
+        components/holly/ReminderController.cpp
         components/fs/FS.cpp
         drivers/Cst816s.cpp
         FreeRTOS/port.c
@@ -834,7 +838,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
   # add_definitions(-DCLOCK_CONFIG_LOG_LEVEL=4)
   # add_definitions(-DRTC_CONFIG_LOG_ENABLED=1)
   # add_definitions(-DRTC_CONFIG_LOG_LEVEL=4)
-  
+
   # Nimble Logging
   add_definitions(-DMYNEWT_VAL_NEWT_FEATURE_LOGCFG=1)
   # add_definitions(-DMYNEWT_VAL_LOG_LEVEL=0)
@@ -1142,4 +1146,3 @@ endif()
 if(BUILD_RESOURCES)
   add_subdirectory(resources)
 endif()
-

@@ -39,7 +39,15 @@ namespace Pinetime {
       SettingChimes,
       SettingShakeThreshold,
       SettingBluetooth,
-      Error
+      Error,
+      HollyApps,
+      HollyHeart,
+      HollyReminder,
+      HollySettings,
+      HollySteps,
+      HollyUnused,
+      HollyUnused2,
+      HollyWorkout,
     };
   }
 }

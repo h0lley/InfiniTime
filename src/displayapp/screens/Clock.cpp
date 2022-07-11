@@ -14,6 +14,7 @@
 #include "displayapp/screens/WatchFaceAnalog.h"
 #include "displayapp/screens/WatchFacePineTimeStyle.h"
 #include "displayapp/screens/WatchFaceCasioStyleG7710.h"
+#include "displayapp/screens/holly/WatchFaceHolly.h"
 
 using namespace Pinetime::Applications::Screens;
 
@@ -47,6 +48,9 @@ Clock::Clock(DisplayApp* app,
           return WatchFacePineTimeStyleScreen();
           break;
         case 3:
+          return WatchFaceHollyScreen();
+          break;
+        case 4:
           return WatchFaceTerminalScreen();
           break;
         case 4:
@@ -108,7 +112,7 @@ std::unique_ptr<Screen> Clock::WatchFaceTerminalScreen() {
                                                       dateTimeController,
                                                       batteryController,
                                                       bleController,
-                                                      notificationManager,
+                                                      notificatioManager,
                                                       settingsController,
                                                       heartRateController,
                                                       motionController);
@@ -135,4 +139,15 @@ std::unique_ptr<Screen> Clock::WatchFaceCasioStyleG7710() {
                                                              heartRateController,
                                                              motionController,
                                                              filesystem);
+}
+
+std::unique_ptr<Screen> Clock::WatchFaceHollyScreen() {
+  return std::make_unique<Screens::WatchFaceHolly>(app,
+                                                     dateTimeController,
+                                                     batteryController,
+                                                     bleController,
+                                                     notificatioManager,
+                                                     settingsController,
+                                                     heartRateController,
+                                                     motionController);
 }

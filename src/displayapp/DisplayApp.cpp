@@ -49,6 +49,15 @@
 #include "displayapp/screens/settings/SettingShakeThreshold.h"
 #include "displayapp/screens/settings/SettingBluetooth.h"
 
+#include "displayapp/screens/holly/HollyApps.h"
+#include "displayapp/screens/holly/HollyHeart.h"
+#include "displayapp/screens/holly/HollyReminder.h"
+#include "displayapp/screens/holly/HollySettings.h"
+#include "displayapp/screens/holly/HollySteps.h"
+#include "displayapp/screens/holly/HollyUnused.h"
+#include "displayapp/screens/holly/HollyUnused2.h"
+#include "displayapp/screens/holly/HollyWorkout.h"
+
 #include "libs/lv_conf.h"
 
 using namespace Pinetime::Applications;
@@ -74,6 +83,7 @@ DisplayApp::DisplayApp(Drivers::St7789& lcd,
                        Pinetime::Controllers::MotionController& motionController,
                        Pinetime::Controllers::TimerController& timerController,
                        Pinetime::Controllers::AlarmController& alarmController,
+                       Pinetime::Controllers::ReminderController& reminderController,
                        Pinetime::Controllers::BrightnessController& brightnessController,
                        Pinetime::Controllers::TouchHandler& touchHandler,
                        Pinetime::Controllers::FS& filesystem)
@@ -91,6 +101,7 @@ DisplayApp::DisplayApp(Drivers::St7789& lcd,
     motionController {motionController},
     timerController {timerController},
     alarmController {alarmController},
+    reminderController {reminderController},
     brightnessController {brightnessController},
     touchHandler {touchHandler},
     filesystem {filesystem} {
@@ -131,6 +142,8 @@ void DisplayApp::InitHw() {
 }
 
 void DisplayApp::Refresh() {
+  hollyState.enabled = settingsController.GetClockFace() == 3;
+
   auto LoadPreviousScreen = [this]() {
     LoadApp(returnToApp, returnDirection);
   };
@@ -198,6 +211,13 @@ void DisplayApp::Refresh() {
           LoadApp(Apps::Alarm, DisplayApp::FullRefreshDirections::None);
         }
         break;
+      case Messages::ReminderTriggered:
+        if (currentApp == Apps::HollyReminder) {
+          auto* reminder = static_cast<Screens::HollyReminder*>(currentScreen.get());
+        } else {
+          LoadApp(Apps::HollyReminder, DisplayApp::FullRefreshDirections::None);
+        }
+        break;
       case Messages::ShowPairingKey:
         LoadApp(Apps::PassKey, DisplayApp::FullRefreshDirections::Up);
         break;
@@ -210,26 +230,129 @@ void DisplayApp::Refresh() {
           break;
         }
         if (!currentScreen->OnTouchEvent(gesture)) {
-          if (currentApp == Apps::Clock) {
-            switch (gesture) {
-              case TouchEvents::SwipeUp:
-                LoadApp(Apps::Launcher, DisplayApp::FullRefreshDirections::Up);
+
+
+          // Holly's watch face?
+          if (hollyState.enabled) {
+
+            // 3x3 grid navigation
+            switch (currentApp) {
+              case Apps::Clock:
+                if (gesture == TouchEvents::SwipeUp) {
+                  LoadApp(Apps::HollyWorkout, DisplayApp::FullRefreshDirections::Up);
+                } else if (gesture == TouchEvents::SwipeDown) {
+                  LoadApp(Apps::HollyReminder, DisplayApp::FullRefreshDirections::Down);
+                } else if (gesture == TouchEvents::SwipeLeft) {
+                  LoadApp(Apps::HollySteps, DisplayApp::FullRefreshDirections::Right);
+                } else if (gesture == TouchEvents::SwipeRight) {
+                  LoadApp(Apps::HollyUnused, DisplayApp::FullRefreshDirections::Left);
+                }
                 break;
-              case TouchEvents::SwipeDown:
-                LoadApp(Apps::Notifications, DisplayApp::FullRefreshDirections::Down);
+
+              case Apps::HollyReminder:
+                if (gesture == TouchEvents::SwipeUp) {
+                  LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::Up);
+                } else if (gesture == TouchEvents::SwipeLeft) {
+                  LoadApp(Apps::HollyHeart, DisplayApp::FullRefreshDirections::Right);
+                } else if (gesture == TouchEvents::SwipeRight) {
+                  LoadApp(Apps::HollyUnused2, DisplayApp::FullRefreshDirections::Left);
+                }
                 break;
-              case TouchEvents::SwipeRight:
-                LoadApp(Apps::QuickSettings, DisplayApp::FullRefreshDirections::RightAnim);
+
+              case Apps::HollyWorkout:
+                if (gesture == TouchEvents::SwipeDown) {
+                  LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::Down);
+                } else if (gesture == TouchEvents::SwipeLeft) {
+                  LoadApp(Apps::HollyApps, DisplayApp::FullRefreshDirections::Right);
+                } else if (gesture == TouchEvents::SwipeRight) {
+                  LoadApp(Apps::HollySettings, DisplayApp::FullRefreshDirections::Left);
+                }
                 break;
-              case TouchEvents::DoubleTap:
-                PushMessageToSystemTask(System::Messages::GoToSleep);
+
+              case Apps::HollyUnused:
+                if (gesture == TouchEvents::SwipeUp) {
+                  LoadApp(Apps::HollySettings, DisplayApp::FullRefreshDirections::Up);
+                } else if (gesture == TouchEvents::SwipeDown) {
+                  LoadApp(Apps::HollyUnused2, DisplayApp::FullRefreshDirections::Down);
+                } else if (gesture == TouchEvents::SwipeLeft) {
+                  LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::Right);
+                }
                 break;
+
+              case Apps::HollySteps:
+                if (gesture == TouchEvents::SwipeUp) {
+                  LoadApp(Apps::HollyApps, DisplayApp::FullRefreshDirections::Up);
+                } else if (gesture == TouchEvents::SwipeDown) {
+                  LoadApp(Apps::HollyHeart, DisplayApp::FullRefreshDirections::Down);
+                } else if (gesture == TouchEvents::SwipeRight) {
+                  LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::Left);
+                }
+                break;
+
+              case Apps::HollyUnused2:
+                if (gesture == TouchEvents::SwipeUp) {
+                  LoadApp(Apps::HollyUnused, DisplayApp::FullRefreshDirections::Up);
+                } else if (gesture == TouchEvents::SwipeLeft) {
+                  LoadApp(Apps::HollyReminder, DisplayApp::FullRefreshDirections::Right);
+                }
+                break;
+
+              case Apps::HollyHeart:
+                if (gesture == TouchEvents::SwipeUp) {
+                  LoadApp(Apps::HollySteps, DisplayApp::FullRefreshDirections::Up);
+                } else if (gesture == TouchEvents::SwipeRight) {
+                  LoadApp(Apps::HollyReminder, DisplayApp::FullRefreshDirections::Left);
+                }
+                break;
+
+              case Apps::HollySettings:
+                if (gesture == TouchEvents::SwipeDown) {
+                  LoadApp(Apps::HollyUnused, DisplayApp::FullRefreshDirections::Down);
+                } else if (gesture == TouchEvents::SwipeLeft) {
+                  LoadApp(Apps::HollyWorkout, DisplayApp::FullRefreshDirections::Right);
+                }
+                break;
+
+              case Apps::HollyApps:
+                if (gesture == TouchEvents::SwipeDown) {
+                  LoadApp(Apps::HollySteps, DisplayApp::FullRefreshDirections::Down);
+                } else if (gesture == TouchEvents::SwipeRight) {
+                  LoadApp(Apps::HollyWorkout, DisplayApp::FullRefreshDirections::Left);
+                }
+                break;
+
               default:
-                break;
+                if (returnTouchEvent == gesture) {
+                  LoadPreviousScreen();
+                }
             }
-          } else if (returnTouchEvent == gesture) {
-            LoadPreviousScreen();
+
+          // Lame standard watch face
+          } else {
+
+            if (currentApp == Apps::Clock) {
+              switch (gesture) {
+                case TouchEvents::SwipeUp:
+                  LoadApp(Apps::Launcher, DisplayApp::FullRefreshDirections::Up);
+                  break;
+                case TouchEvents::SwipeDown:
+                  LoadApp(Apps::Notifications, DisplayApp::FullRefreshDirections::Down);
+                  break;
+                case TouchEvents::SwipeRight:
+                  LoadApp(Apps::QuickSettings, DisplayApp::FullRefreshDirections::RightAnim);
+                  break;
+                case TouchEvents::DoubleTap:
+                  PushMessageToSystemTask(System::Messages::GoToSleep);
+                  break;
+                default:
+                  break;
+              }
+            } else if (returnTouchEvent == gesture) {
+              LoadPreviousScreen();
+            }
+
           }
+
         } else {
           touchHandler.CancelTap();
         }
@@ -245,13 +368,7 @@ void DisplayApp::Refresh() {
         break;
       case Messages::ButtonLongPressed:
         if (currentApp != Apps::Clock) {
-          if (currentApp == Apps::Notifications) {
-            LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::Up);
-          } else if (currentApp == Apps::QuickSettings) {
-            LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::LeftAnim);
-          } else {
-            LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::Down);
-          }
+          LoadApp(Apps::Clock, DisplayApp::FullRefreshDirections::RightAnim);
         }
         break;
       case Messages::ButtonLongerPressed:
@@ -259,8 +376,10 @@ void DisplayApp::Refresh() {
         LoadApp(Apps::SysInfo, DisplayApp::FullRefreshDirections::Up);
         break;
       case Messages::ButtonDoubleClicked:
-        if (currentApp != Apps::Notifications && currentApp != Apps::NotificationsPreview) {
-          LoadApp(Apps::Notifications, DisplayApp::FullRefreshDirections::Down);
+        if (currentApp == Apps::HollyWorkout) {
+          PushMessageToSystemTask(System::Messages::GoToSleep);
+        } else {
+          LoadApp(Apps::HollyWorkout, DisplayApp::FullRefreshDirections::RightAnim);
         }
         break;
 
@@ -309,9 +428,55 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
   SetFullRefresh(direction);
 
   // default return to launcher
-  ReturnApp(Apps::Launcher, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+  if (hollyState.enabled) {
+    ReturnApp(Apps::HollyApps, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+  } else {
+    ReturnApp(Apps::Launcher, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+  }
 
   switch (app) {
+    case Apps::HollyReminder:
+      currentScreen = std::make_unique<Screens::HollyReminder>(this, reminderController, settingsController, dateTimeController, *systemTask);
+      ReturnApp(Apps::Clock, FullRefreshDirections::Up, TouchEvents::SwipeUp);
+      break;
+
+    case Apps::HollyWorkout:
+      currentScreen = std::make_unique<Screens::HollyWorkout>(this, dateTimeController);
+      ReturnApp(Apps::Clock, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+      break;
+
+    case Apps::HollyUnused:
+      currentScreen = std::make_unique<Screens::HollyUnused>(this);
+      ReturnApp(Apps::Clock, FullRefreshDirections::RightAnim, TouchEvents::SwipeLeft);
+      break;
+
+    case Apps::HollySteps:
+      currentScreen = std::make_unique<Screens::HollySteps>(this, motionController, settingsController);
+      ReturnApp(Apps::Clock, FullRefreshDirections::LeftAnim, TouchEvents::SwipeRight);
+      break;
+
+    case Apps::HollyUnused2:
+      currentScreen = std::make_unique<Screens::HollyUnused2>(this);
+      ReturnApp(Apps::Clock, FullRefreshDirections::RightAnim, TouchEvents::SwipeUp);
+      break;
+
+    case Apps::HollyHeart:
+      currentScreen = std::make_unique<Screens::HollyHeart>(this, heartRateController, *systemTask);
+      ReturnApp(Apps::Clock, FullRefreshDirections::LeftAnim, TouchEvents::SwipeDown);
+      break;
+
+    case Apps::HollySettings:
+      currentScreen = std::make_unique<Screens::HollySettings>(this,
+                                                               brightnessController,
+                                                               settingsController);
+      ReturnApp(Apps::Clock, FullRefreshDirections::RightAnim, TouchEvents::SwipeLeft);
+      break;
+
+    case Apps::HollyApps:
+      currentScreen = std::make_unique<Screens::HollyApps>(this);
+      ReturnApp(Apps::Clock, FullRefreshDirections::LeftAnim, TouchEvents::SwipeRight);
+      break;
+
     case Apps::Launcher:
       currentScreen =
         std::make_unique<Screens::ApplicationList>(this, settingsController, batteryController, bleController, dateTimeController);
@@ -387,7 +552,13 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
       break;
     case Apps::Settings:
       currentScreen = std::make_unique<Screens::Settings>(this, settingsController);
-      ReturnApp(Apps::QuickSettings, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+
+      if (hollyState.enabled) {
+        ReturnApp(Apps::HollySettings, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+      } else {
+        ReturnApp(Apps::QuickSettings, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+      }
+
       break;
     case Apps::SettingWatchFace:
       currentScreen = std::make_unique<Screens::SettingWatchFace>(this, settingsController, filesystem);
@@ -431,7 +602,13 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
       break;
     case Apps::BatteryInfo:
       currentScreen = std::make_unique<Screens::BatteryInfo>(this, batteryController);
-      ReturnApp(Apps::Settings, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+
+      if (hollyState.enabled) {
+        ReturnApp(Apps::HollyApps, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+      } else {
+        ReturnApp(Apps::Settings, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+      }
+
       break;
     case Apps::SysInfo:
       currentScreen = std::make_unique<Screens::SystemInfo>(this,
@@ -446,7 +623,13 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
       break;
     case Apps::FlashLight:
       currentScreen = std::make_unique<Screens::FlashLight>(this, *systemTask, brightnessController);
-      ReturnApp(Apps::QuickSettings, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+
+      if (hollyState.enabled) {
+        ReturnApp(Apps::HollyApps, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+      } else {
+        ReturnApp(Apps::QuickSettings, FullRefreshDirections::Down, TouchEvents::SwipeDown);
+      }
+
       break;
     case Apps::StopWatch:
       currentScreen = std::make_unique<Screens::StopWatch>(this, *systemTask);
@@ -471,7 +654,13 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
       break;
     case Apps::Metronome:
       currentScreen = std::make_unique<Screens::Metronome>(this, motorController, *systemTask);
-      ReturnApp(Apps::Launcher, FullRefreshDirections::Down, TouchEvents::None);
+
+      if (hollyState.enabled) {
+        ReturnApp(Apps::HollyApps, FullRefreshDirections::Down, TouchEvents::None);
+      } else {
+        ReturnApp(Apps::Launcher, FullRefreshDirections::Down, TouchEvents::None);
+      }
+
       break;
     case Apps::Motion:
       currentScreen = std::make_unique<Screens::Motion>(this, motionController);

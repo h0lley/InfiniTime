@@ -57,6 +57,7 @@ SystemTask::SystemTask(Drivers::SpiMaster& spi,
                        Controllers::DateTime& dateTimeController,
                        Controllers::TimerController& timerController,
                        Controllers::AlarmController& alarmController,
+                       Controllers::ReminderController& reminderController,
                        Drivers::Watchdog& watchdog,
                        Pinetime::Controllers::NotificationManager& notificationManager,
                        Pinetime::Controllers::MotorController& motorController,
@@ -81,6 +82,7 @@ SystemTask::SystemTask(Drivers::SpiMaster& spi,
     dateTimeController {dateTimeController},
     timerController {timerController},
     alarmController {alarmController},
+    reminderController {reminderController},
     watchdog {watchdog},
     notificationManager {notificationManager},
     motorController {motorController},
@@ -151,6 +153,7 @@ void SystemTask::Work() {
   motionSensor.SoftReset();
   timerController.Init(this);
   alarmController.Init(this);
+  reminderController.Init(this);
 
   // Reset the TWI device because the motion sensor chip most probably crashed it...
   twiMaster.Sleep();
@@ -302,6 +305,13 @@ void SystemTask::Work() {
           }
           motorController.StartRinging();
           displayApp.PushMessage(Pinetime::Applications::Display::Messages::AlarmTriggered);
+          break;
+        case Messages::SetOffReminder:
+          if (state == SystemTaskState::Sleeping) {
+            GoToRunning();
+          }
+          motorController.StartRinging();
+          displayApp.PushMessage(Pinetime::Applications::Display::Messages::ReminderTriggered);
           break;
         case Messages::StopRinging:
           motorController.StopRinging();

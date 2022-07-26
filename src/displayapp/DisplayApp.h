@@ -80,7 +80,8 @@ namespace Pinetime {
         uint8_t current_exercise = 0;
         uint8_t current_set = 0;
         bool reminder_enabled = false;
-        uint8_t today;
+        uint8_t today_reminder;
+        uint8_t today_exercise;
         uint8_t todays_exercise_done_count = 0;
         uint8_t todays_reminder_dismissal_count = 0;
       } hollyState;

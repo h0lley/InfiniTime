@@ -17,7 +17,8 @@ namespace Pinetime {
       void Init(System::SystemTask* systemTask);
       void SetReminder(uint8_t min);
       void DisableReminder();
-      void SetOffRemindermNow();
+      void SetOffReminderNow();
+      bool IsReminderActive();
 
       uint32_t SecondsToReminder();
       void StopAlerting();

@@ -41,11 +41,13 @@ namespace Pinetime {
 
         lv_task_t* taskRefresh;
 
+        uint16_t awaiting_response_tick_cd = 0;
+
+        // Config
         const uint16_t full_duration_min = 40;
         const uint16_t snooze_duration_min = 20;
         const uint16_t ignore_duration_min = 5;
-
-        uint16_t awaiting_response_tick_cd = 0;
+        const uint8_t evening_start_hour = 22;
       };
     }
   }

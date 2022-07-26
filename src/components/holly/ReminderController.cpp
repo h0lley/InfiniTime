@@ -12,7 +12,7 @@ ReminderController::ReminderController() {
 namespace {
   void SetOffAlarm(TimerHandle_t xTimer) {
     auto controller = static_cast<Pinetime::Controllers::ReminderController*>(pvTimerGetTimerID(xTimer));
-    controller->SetOffRemindermNow();
+    controller->SetOffReminderNow();
   }
 }
 
@@ -27,11 +27,15 @@ void ReminderController::SetReminder(uint8_t min) {
   xTimerStart(alarmTimer, 0);
 }
 
+bool ReminderController::IsReminderActive() {
+  return xTimerIsTimerActive(alarmTimer) != pdFALSE;
+}
+
 void ReminderController::DisableReminder() {
   xTimerStop(alarmTimer, 0);
 }
 
-void ReminderController::SetOffRemindermNow() {
+void ReminderController::SetOffReminderNow() {
   systemTask->PushMessage(System::Messages::SetOffReminder);
 }
 

@@ -12,7 +12,7 @@ namespace {
   }
 }
 
-constexpr std::array<const char*, 15> HollyWorkout::exercises;
+constexpr std::array<const char*, 16> HollyWorkout::exercises;
 
 HollyWorkout::HollyWorkout(DisplayApp* app, Controllers::DateTime& dateTimeController)
   : Screen(app),
@@ -57,7 +57,7 @@ HollyWorkout::HollyWorkout(DisplayApp* app, Controllers::DateTime& dateTimeContr
   lv_style_set_bg_color(&btn_style, LV_STATE_DEFAULT, lv_color_hex(0xA43C62));
 
   // Done button
-  lv_obj_t* done_btn = lv_btn_create(lv_scr_act(), nullptr);
+  done_btn = lv_btn_create(lv_scr_act(), nullptr);
   done_btn->user_data = this;
   lv_obj_set_event_cb(done_btn, ButtonEventHandler);
   lv_obj_add_style(done_btn, LV_BTN_PART_MAIN, &btn_style);
@@ -68,8 +68,8 @@ HollyWorkout::HollyWorkout(DisplayApp* app, Controllers::DateTime& dateTimeContr
   lv_obj_set_style_local_text_color(labeled_done_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xF6DAB5));
 
   // Reminder dismissal count
-  if (app->hollyState.today != dateTimeController.Day()) {
-    app->hollyState.today = dateTimeController.Day();
+  if (app->hollyState.today_exercise != dateTimeController.Day()) {
+    app->hollyState.today_exercise = dateTimeController.Day();
     app->hollyState.todays_exercise_done_count = 0;
   }
 
@@ -98,7 +98,7 @@ HollyWorkout::~HollyWorkout() {
 }
 
 void HollyWorkout::OnButtonEvent(lv_obj_t* object, lv_event_t event) {
-  if (event == LV_EVENT_CLICKED) {
+  if (event == LV_EVENT_CLICKED && object == done_btn) {
 
     app->hollyState.current_set = (app->hollyState.current_set + 1) % set_amount;
 
@@ -106,15 +106,18 @@ void HollyWorkout::OnButtonEvent(lv_obj_t* object, lv_event_t event) {
       app->hollyState.current_exercise = (app->hollyState.current_exercise + 1) % exercise_amount;
       lv_label_set_text_static(exercise_label, exercises[app->hollyState.current_exercise]);
       lv_obj_align(exercise_label, lv_scr_act(), LV_ALIGN_IN_TOP_MID, -20, 40);
-      lv_label_set_text_static(labeled_done_btn, "Done");
-    } else if (app->hollyState.current_set == set_amount - 1) {
-      lv_label_set_text_static(labeled_done_btn, "Next");
+      //lv_label_set_text_static(labeled_done_btn, "Done");
     }
+    //else if (app->hollyState.current_set == set_amount - 1) {
+    //  lv_label_set_text_static(labeled_done_btn, "Next");
+    //}
+
+    lv_obj_set_hidden(done_btn, true);
 
     lv_label_set_text_fmt(set_label, "%d / %d", app->hollyState.current_set + 1, set_amount);
 
-    if (app->hollyState.today != dateTimeController.Day()) {
-      app->hollyState.today = dateTimeController.Day();
+    if (app->hollyState.today_exercise != dateTimeController.Day()) {
+      app->hollyState.today_exercise = dateTimeController.Day();
       app->hollyState.todays_exercise_done_count = 0;
     }
 

@@ -411,6 +411,15 @@ list(APPEND SOURCE_FILES
         displayapp/widgets/Counter.cpp
         displayapp/widgets/PageIndicator.cpp
         displayapp/widgets/StatusIcons.cpp
+        # Holly's apps
+        displayapp/screens/holly/HollyApps.cpp
+        displayapp/screens/holly/HollyHeart.cpp
+        displayapp/screens/holly/HollyReminder.cpp
+        displayapp/screens/holly/HollySettings.cpp
+        displayapp/screens/holly/HollySteps.cpp
+        displayapp/screens/holly/HollyGym.cpp
+        displayapp/screens/holly/HollyUnused2.cpp
+        displayapp/screens/holly/HollyWorkout.cpp
 
         ## Settings
         displayapp/screens/settings/QuickSettings.cpp

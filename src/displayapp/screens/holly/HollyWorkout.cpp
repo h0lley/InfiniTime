@@ -12,7 +12,7 @@ namespace {
   }
 }
 
-constexpr std::array<const char*, 16> HollyWorkout::exercises;
+constexpr std::array<const char*, HollyWorkout::exercise_amount> HollyWorkout::exercises;
 
 HollyWorkout::HollyWorkout(DisplayApp* app, Controllers::DateTime& dateTimeController)
   : Screen(app),

@@ -45,7 +45,7 @@ namespace Pinetime {
       HollyReminder,
       HollySettings,
       HollySteps,
-      HollyUnused,
+      HollyGym,
       HollyUnused2,
       HollyWorkout,
     };

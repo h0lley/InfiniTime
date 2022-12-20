@@ -111,6 +111,12 @@ HollyReminder::HollyReminder(DisplayApp* app,
   lv_obj_set_style_local_bg_color(enabled_switch, LV_SWITCH_PART_KNOB, LV_STATE_DEFAULT, lv_color_hex(0x398583));
   lv_obj_set_style_local_bg_color(enabled_switch, LV_SWITCH_PART_KNOB, LV_STATE_CHECKED, lv_color_hex(0xFF5921));
 
+  if (app->hollyState.reminder_enabled) {
+    lv_switch_on(enabled_switch, LV_ANIM_OFF);
+  } else {
+    lv_switch_off(enabled_switch, LV_ANIM_OFF);
+  }
+
   // Reminder dismissal count
   if (app->hollyState.today_reminder != dateTimeController.Day()) {
     app->hollyState.today_reminder = dateTimeController.Day();
@@ -190,7 +196,7 @@ void HollyReminder::OnButtonEvent(lv_obj_t* object, lv_event_t event) {
 
     if (object == enabled_switch) {
 
-      if (!reminderController.IsReminderActive()) { // lv_switch_get_state(enabled_switch)
+      if (!app->hollyState.reminder_enabled) {
 
         lv_switch_on(enabled_switch, LV_ANIM_OFF);
         lv_obj_set_hidden(time_remaining_label, false);

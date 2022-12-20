@@ -41,19 +41,19 @@ HollySettings::HollySettings(Pinetime::Applications::DisplayApp* app,
   lv_style_init(&btn_style);
   lv_style_set_bg_opa(&btn_style, LV_STATE_DEFAULT, LV_OPA_TRANSP);
 
-  // Top left
-  btn1_btn = lv_btn_create(lv_scr_act(), nullptr);
-  btn1_btn->user_data = this;
-  lv_obj_set_event_cb(btn1_btn, ButtonEventHandler);
-  lv_obj_add_style(btn1_btn, LV_BTN_PART_MAIN, &btn_style);
-  lv_obj_set_size(btn1_btn, 80, 80);
-  lv_obj_align(btn1_btn, nullptr, LV_ALIGN_IN_TOP_LEFT, 35, 35);
-  lv_obj_t* labeled_btn1_btn = lv_label_create(btn1_btn, nullptr);
-  lv_label_set_text_static(labeled_btn1_btn, "Watch\nface");
-  //lv_obj_set_style_local_text_font(labeled_btn1_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_sys_80);
-  lv_obj_set_style_local_text_color(labeled_btn1_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x009D7B));
+  // Toggle bluetooth
+  bluetooth_btn = lv_btn_create(lv_scr_act(), nullptr);
+  bluetooth_btn->user_data = this;
+  lv_obj_set_event_cb(bluetooth_btn, ButtonEventHandler);
+  lv_obj_add_style(bluetooth_btn, LV_BTN_PART_MAIN, &btn_style);
+  lv_obj_set_size(bluetooth_btn, 80, 80);
+  lv_obj_align(bluetooth_btn, nullptr, LV_ALIGN_IN_TOP_LEFT, 35, 35);
+  lv_obj_t* labeled_bluetooth_btn = lv_label_create(bluetooth_btn, nullptr);
+  lv_label_set_text_static(labeled_bluetooth_btn, "Blue-\ntooth");
+  //lv_obj_set_style_local_text_font(labeled_bluetooth_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_sys_80);
+  lv_obj_set_style_local_text_color(labeled_bluetooth_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x009D7B));
 
-  // Top right
+  // Validate OS
   btn2_btn = lv_btn_create(lv_scr_act(), nullptr);
   btn2_btn->user_data = this;
   lv_obj_set_event_cb(btn2_btn, ButtonEventHandler);
@@ -111,11 +111,15 @@ void HollySettings::OnButtonEvent(lv_obj_t* object, lv_event_t event) {
     running = false;
     settingsController.SetSettingsMenu(0);
     app->StartApp(Apps::Settings, DisplayApp::FullRefreshDirections::Up);
-  } else if (object == btn1_btn) {
+  } else if (object == bluetooth_btn) {
+
     running = false;
-    app->StartApp(Apps::SettingWatchFace, DisplayApp::FullRefreshDirections::Up);
+    app->StartApp(Apps::SettingBluetooth, DisplayApp::FullRefreshDirections::Up);
+
   } else if (object == btn2_btn) {
+
     running = false;
     app->StartApp(Apps::FirmwareValidation, DisplayApp::FullRefreshDirections::Up);
+
   }
 }

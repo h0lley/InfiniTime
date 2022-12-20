@@ -54,7 +54,7 @@
 #include "displayapp/screens/holly/HollyReminder.h"
 #include "displayapp/screens/holly/HollySettings.h"
 #include "displayapp/screens/holly/HollySteps.h"
-#include "displayapp/screens/holly/HollyUnused.h"
+#include "displayapp/screens/holly/HollyGym.h"
 #include "displayapp/screens/holly/HollyUnused2.h"
 #include "displayapp/screens/holly/HollyWorkout.h"
 
@@ -245,7 +245,7 @@ void DisplayApp::Refresh() {
                 } else if (gesture == TouchEvents::SwipeLeft) {
                   LoadApp(Apps::HollySteps, DisplayApp::FullRefreshDirections::Right);
                 } else if (gesture == TouchEvents::SwipeRight) {
-                  LoadApp(Apps::HollyUnused, DisplayApp::FullRefreshDirections::Left);
+                  LoadApp(Apps::HollyGym, DisplayApp::FullRefreshDirections::Left);
                 }
                 break;
 
@@ -269,7 +269,7 @@ void DisplayApp::Refresh() {
                 }
                 break;
 
-              case Apps::HollyUnused:
+              case Apps::HollyGym:
                 if (gesture == TouchEvents::SwipeUp) {
                   LoadApp(Apps::HollySettings, DisplayApp::FullRefreshDirections::Up);
                 } else if (gesture == TouchEvents::SwipeDown) {
@@ -291,7 +291,7 @@ void DisplayApp::Refresh() {
 
               case Apps::HollyUnused2:
                 if (gesture == TouchEvents::SwipeUp) {
-                  LoadApp(Apps::HollyUnused, DisplayApp::FullRefreshDirections::Up);
+                  LoadApp(Apps::HollyGym, DisplayApp::FullRefreshDirections::Up);
                 } else if (gesture == TouchEvents::SwipeLeft) {
                   LoadApp(Apps::HollyReminder, DisplayApp::FullRefreshDirections::Right);
                 }
@@ -307,7 +307,7 @@ void DisplayApp::Refresh() {
 
               case Apps::HollySettings:
                 if (gesture == TouchEvents::SwipeDown) {
-                  LoadApp(Apps::HollyUnused, DisplayApp::FullRefreshDirections::Down);
+                  LoadApp(Apps::HollyGym, DisplayApp::FullRefreshDirections::Down);
                 } else if (gesture == TouchEvents::SwipeLeft) {
                   LoadApp(Apps::HollyWorkout, DisplayApp::FullRefreshDirections::Right);
                 }
@@ -445,8 +445,8 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
       ReturnApp(Apps::Clock, FullRefreshDirections::Down, TouchEvents::SwipeDown);
       break;
 
-    case Apps::HollyUnused:
-      currentScreen = std::make_unique<Screens::HollyUnused>(this);
+    case Apps::HollyGym:
+      currentScreen = std::make_unique<Screens::HollyGym>(this, fs);
       ReturnApp(Apps::Clock, FullRefreshDirections::RightAnim, TouchEvents::SwipeLeft);
       break;
 

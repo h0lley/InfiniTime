@@ -31,12 +31,12 @@ namespace Pinetime {
         lv_style_t content_bg_style;
         lv_style_t btn_style;
 
+        lv_obj_t* bluetooth_btn;
         lv_obj_t* brightness_btn;
         lv_obj_t* labeled_brightness_btn;
         lv_obj_t* more_configs_btn;
 
         // Temp
-        lv_obj_t* btn1_btn;
         lv_obj_t* btn2_btn;
       };
     }

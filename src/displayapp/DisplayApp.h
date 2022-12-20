@@ -17,6 +17,7 @@
 #include "components/alarm/AlarmController.h"
 #include "components/holly/ReminderController.h"
 #include "touchhandler/TouchHandler.h"
+#include "components/fs/FS.h"
 
 #include "displayapp/Messages.h"
 #include "BootErrors.h"

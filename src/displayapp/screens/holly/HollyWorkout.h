@@ -23,26 +23,28 @@ namespace Pinetime {
         lv_style_t content_bg_style;
         lv_style_t btn_style;
 
-        static const uint8_t exercise_amount = 16; // Needs to updated in cpp:15 too
+        static const uint8_t exercise_amount = 18;
         static const uint8_t set_amount = 2;
 
         static constexpr std::array<const char*, exercise_amount> exercises = {
+          "Pike\npush ups",
           "Push ups",
-          "Dumbbell\nshrugs",
           "Lateral\nraises",
+          "Rear delt\nrows",
+          "Hip\nhuggers",
           "Overhead\npress",
-          "Band chest\nflies",
+          "Dumbbell\nbench press",
           "Dips",
-          "Squads",
-          "Glute\nbridges",
+          "Push ups",
           "Pull ups",
           "Chin ups",
-          "Levitation\ncrunches",
-          "Reverse\ncrunches",
-          "Hip\nhuggers",
+          "Wide grip\npull ups",
           "Dumbbell\ncurls",
+          "Reverse\ncurls"
           "Dumbbell\ntripod rows",
-          "Hang"
+          "Levitation\ncrunches",
+          "Squads",
+          "Glute\nbridges",
         };
 
         lv_obj_t* exercise_label;

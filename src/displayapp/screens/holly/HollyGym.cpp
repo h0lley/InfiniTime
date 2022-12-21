@@ -41,20 +41,24 @@ HollyGym::HollyGym(DisplayApp* app, Pinetime::Controllers::FS& fs)
   lv_obj_add_style(content_bg, LV_OBJ_PART_MAIN, &content_bg_style);
   lv_obj_set_size(content_bg, 200, 200);
 
-  // Button style
+  // Button styles
   lv_style_init(&btn_style);
-  lv_style_set_bg_color(&btn_style, LV_STATE_DEFAULT, lv_color_hex(0x640748));
-
   lv_style_init(&btn_style_bordercover);
+  lv_style_set_bg_color(&btn_style, LV_STATE_DEFAULT, lv_color_hex(0x640748));
   lv_style_set_bg_color(&btn_style_bordercover, LV_STATE_DEFAULT, lv_color_hex(0xDE4C4A));
 
   // Content
   for (uint8_t i = 0; i < machines_per_page; i++) {
-    uint8_t entry_idx = (current_page * machines_per_page) + i;
     uint8_t y_offset = 32 + i * 32;
 
     // Machine name
+    Selection* machine_selection = &selections[i];
+    machine_selection->pos = i;
+    machine_selection->metric = METRIC_MACHINE;
+    machine_selection->for_cb = this;
+
     lv_obj_t* machine_btn = lv_btn_create(lv_scr_act(), nullptr);
+    machine_btn->user_data = machine_selection;
     lv_obj_set_event_cb(machine_btn, SelectionEventHandler);
     lv_obj_add_style(machine_btn, LV_BTN_PART_MAIN, &btn_style_bordercover);
     lv_obj_set_size(machine_btn, 92, 34);
@@ -70,7 +74,13 @@ HollyGym::HollyGym(DisplayApp* app, Pinetime::Controllers::FS& fs)
     machine_labels[i] = machine_label;
 
     // Reps
+    Selection* reps_selection = &selections[machines_per_page + i];
+    reps_selection->pos = i;
+    reps_selection->metric = METRIC_REPS;
+    reps_selection->for_cb = this;
+
     lv_obj_t* reps_btn = lv_btn_create(lv_scr_act(), nullptr);
+    reps_btn->user_data = reps_selection;
     lv_obj_set_event_cb(reps_btn, SelectionEventHandler);
     lv_obj_add_style(reps_btn, LV_BTN_PART_MAIN, &btn_style);
     lv_obj_set_size(reps_btn, 44, 34);
@@ -87,7 +97,13 @@ HollyGym::HollyGym(DisplayApp* app, Pinetime::Controllers::FS& fs)
     reps_labels[i] = reps_label;
 
     // Weight
+    Selection* weight_selection = &selections[machines_per_page * 2 + i];
+    weight_selection->pos = i;
+    weight_selection->metric = METRIC_WEIGHT;
+    weight_selection->for_cb = this;
+
     lv_obj_t* weight_btn = lv_btn_create(lv_scr_act(), nullptr);
+    weight_btn->user_data = weight_selection;
     lv_obj_set_event_cb(weight_btn, SelectionEventHandler);
     lv_obj_add_style(weight_btn, LV_BTN_PART_MAIN, &btn_style);
     lv_obj_set_size(weight_btn, 80, 34);
@@ -182,30 +198,12 @@ HollyGym::~HollyGym() {
 }
 
 void HollyGym::Refresh() {
+  // Update the labels
   for (uint8_t i = 0; i < machines_per_page; i++) {
     uint8_t idx = (current_page * machines_per_page) + i;
     lv_label_set_text_static(machine_labels[i], machine_names[gymData.order[idx]]);
     lv_label_set_text_fmt(reps_labels[i], "%dx", gymData.reps[gymData.order[idx]]);
     lv_label_set_text_fmt(weight_labels[i], "%.1fkg", gymData.weights[gymData.order[idx]]);
-
-    Selection* machine_selection = &selections[i];
-    machine_selection->pos = i;
-    machine_selection->metric = METRIC_MACHINE;
-    machine_selection->for_cb = this;
-    machine_btns[i]->user_data = machine_selection;
-
-    Selection* reps_selection = &selections[machines_per_page + i];
-    reps_selection->pos = i;
-    reps_selection->metric = METRIC_REPS;
-    reps_selection->for_cb = this;
-    reps_btns[i]->user_data = reps_selection;
-
-    Selection* weight_selection = &selections[machines_per_page * 2 + i];
-    weight_selection->pos = i;
-    weight_selection->metric = METRIC_WEIGHT;
-    weight_selection->for_cb = this;
-    weight_btns[i]->user_data = weight_selection;
-
   }
 
   // Hide or show pagination buttons
@@ -277,9 +275,9 @@ void HollyGym::OnButtonEvent(lv_obj_t* object, lv_event_t event, Selection* sele
       uint8_t selected_idx = (current_page * machines_per_page) + active_selection->pos;
 
       if (active_selection->metric == METRIC_REPS) {
-        gymData.reps[selected_idx] += 1;
+        gymData.reps[gymData.order[selected_idx]] += 1;
       } else if (active_selection->metric == METRIC_WEIGHT) {
-        gymData.weights[selected_idx] += weight_increments;
+        gymData.weights[gymData.order[selected_idx]] += weight_increments;
       } else if (active_selection->metric == METRIC_MACHINE) {
         uint8_t tmp = gymData.order[selected_idx];
         gymData.order[selected_idx] = gymData.order[selected_idx + 1];
@@ -297,9 +295,9 @@ void HollyGym::OnButtonEvent(lv_obj_t* object, lv_event_t event, Selection* sele
       uint8_t selected_idx = (current_page * machines_per_page) + active_selection->pos;
 
       if (active_selection->metric == METRIC_REPS) {
-        gymData.reps[selected_idx] -= 1;
+        gymData.reps[gymData.order[selected_idx]] -= 1;
       } else if (active_selection->metric == METRIC_WEIGHT) {
-        gymData.weights[selected_idx] -= weight_increments;
+        gymData.weights[gymData.order[selected_idx]] -= weight_increments;
       } else if (active_selection->metric == METRIC_MACHINE) {
         uint8_t tmp = gymData.order[selected_idx];
         gymData.order[selected_idx] = gymData.order[selected_idx - 1];

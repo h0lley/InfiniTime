@@ -11,7 +11,7 @@ typedef enum
   METRIC_MACHINE,
   METRIC_REPS,
   METRIC_WEIGHT,
-} MetricTypes;
+} MetricType;
 
 namespace Pinetime {
   namespace Applications {
@@ -22,11 +22,9 @@ namespace Pinetime {
         ~HollyGym() override;
 
         struct Selection {
-          uint8_t idx = 0;
-          MetricTypes metric = METRIC_UNSET;
-          lv_obj_t* label = nullptr;
-          lv_obj_t* btn = nullptr;
-          HollyGym* self = nullptr;
+          uint8_t pos = 0;
+          MetricType metric = METRIC_UNSET;
+          HollyGym* for_cb = nullptr;
         };
 
         void OnButtonEvent(lv_obj_t* object, lv_event_t event, Selection* selection);
@@ -50,9 +48,10 @@ namespace Pinetime {
         uint8_t current_page = 0;
 
         static const uint8_t machine_amount = 40; // when changed, GymData version needs to be upped
-        static const uint8_t machines_per_page = 4;
+        static const uint8_t machines_per_page = 4; // machine_amount should be divisible by this
+        static constexpr float weight_increments = 2.5f;
 
-        std::array<Selection, machine_amount * 3> selections;
+        std::array<Selection, machines_per_page * 3> selections;
         Selection* active_selection = nullptr;
 
         static constexpr std::array<const char*, machine_amount> machine_names = {

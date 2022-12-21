@@ -12,7 +12,7 @@ namespace {
 
   void SelectionEventHandler(lv_obj_t* obj, lv_event_t event) {
     auto* selection = static_cast<HollyGym::Selection*>(obj->user_data);
-    auto* screen = static_cast<HollyGym*>(selection->self);
+    auto* screen = static_cast<HollyGym*>(selection->for_cb);
     screen->OnButtonEvent(obj, event, selection);
   }
 }
@@ -59,7 +59,6 @@ HollyGym::HollyGym(DisplayApp* app, Pinetime::Controllers::FS& fs)
     lv_obj_add_style(machine_btn, LV_BTN_PART_MAIN, &btn_style_bordercover);
     lv_obj_set_size(machine_btn, 92, 34);
     lv_obj_align(machine_btn, nullptr, LV_ALIGN_IN_TOP_RIGHT, -141, y_offset - 4);
-    //lv_obj_set_style_local_bg_opa(machine_btn, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_TRANSP);
     machine_btns[i] = machine_btn;
 
     lv_obj_t* machine_label = lv_label_create(lv_scr_act(), nullptr);
@@ -180,57 +179,53 @@ HollyGym::~HollyGym() {
     lv_obj_clean(reps_btns[i]);
     lv_obj_clean(weight_btns[i]);
   }
-
-  for (uint8_t i = 0; i < machine_amount * 3; i++) {
-    if (selections[i].label != nullptr) {
-      lv_obj_clean(selections[i].label);
-      lv_obj_clean(selections[i].btn);
-    }
-  }
 }
 
 void HollyGym::Refresh() {
   for (uint8_t i = 0; i < machines_per_page; i++) {
-    uint8_t entry_idx = (current_page * machines_per_page) + i;
+    uint8_t idx = (current_page * machines_per_page) + i;
+    lv_label_set_text_static(machine_labels[i], machine_names[gymData.order[idx]]);
+    lv_label_set_text_fmt(reps_labels[i], "%dx", gymData.reps[gymData.order[idx]]);
+    lv_label_set_text_fmt(weight_labels[i], "%.1fkg", gymData.weights[gymData.order[idx]]);
 
-    lv_label_set_text_static(machine_labels[i], machine_names[gymData.order[entry_idx]]);
-    lv_label_set_text_fmt(reps_labels[i], "%dx", gymData.reps[gymData.order[entry_idx]]);
-    lv_label_set_text_fmt(weight_labels[i], "%.1fkg", gymData.weights[gymData.order[entry_idx]]);
-
-    Selection* machine_selection = &selections[entry_idx];
-    machine_selection->idx = entry_idx;
+    Selection* machine_selection = &selections[i];
+    machine_selection->pos = i;
     machine_selection->metric = METRIC_MACHINE;
-    machine_selection->label = machine_labels[i];
-    machine_selection->btn = machine_btns[i];
-    machine_selection->self = this;
+    machine_selection->for_cb = this;
     machine_btns[i]->user_data = machine_selection;
 
-    Selection* reps_selection = &selections[machine_amount + entry_idx];
-    reps_selection->idx = entry_idx;
+    Selection* reps_selection = &selections[machines_per_page + i];
+    reps_selection->pos = i;
     reps_selection->metric = METRIC_REPS;
-    reps_selection->label = reps_labels[i];
-    reps_selection->btn = reps_btns[i];
-    reps_selection->self = this;
+    reps_selection->for_cb = this;
     reps_btns[i]->user_data = reps_selection;
 
-    Selection* weight_selection = &selections[machine_amount * 2 + entry_idx];
-    weight_selection->idx = entry_idx;
+    Selection* weight_selection = &selections[machines_per_page * 2 + i];
+    weight_selection->pos = i;
     weight_selection->metric = METRIC_WEIGHT;
-    weight_selection->label = weight_labels[i];
-    weight_selection->btn = weight_btns[i];
-    weight_selection->self = this;
+    weight_selection->for_cb = this;
     weight_btns[i]->user_data = weight_selection;
 
   }
 
+  // Hide or show pagination buttons
   lv_obj_set_hidden(prev_btn, current_page == 0 ? true : false);
   lv_obj_set_hidden(next_btn, current_page == machine_amount / machines_per_page - 1 ? true : false);
 
+  // Hide or show +/- buttons
   if (active_selection) {
-    lv_obj_set_hidden(increase_btn,
-      active_selection->metric == METRIC_MACHINE && active_selection->idx == machine_amount - 1);
-    lv_obj_set_hidden(decrease_btn,
-      active_selection->metric == METRIC_MACHINE && active_selection->idx == 0);
+    uint8_t selected_idx = (current_page * machines_per_page) + active_selection->pos;
+
+    if (active_selection->metric == METRIC_MACHINE) {
+      lv_obj_set_hidden(increase_btn, selected_idx == machine_amount - 1);
+      lv_obj_set_hidden(decrease_btn, selected_idx == 0);
+    } else if (active_selection->metric == METRIC_REPS) {
+      lv_obj_set_hidden(increase_btn, gymData.reps[selected_idx] == 99);
+      lv_obj_set_hidden(decrease_btn, gymData.reps[selected_idx] == 0);
+    } else if (active_selection->metric == METRIC_WEIGHT) {
+      lv_obj_set_hidden(increase_btn, gymData.weights[selected_idx] > 97.0);
+      lv_obj_set_hidden(decrease_btn, gymData.weights[selected_idx] < 2.0);
+    }
   } else {
     lv_obj_set_hidden(increase_btn, true);
     lv_obj_set_hidden(decrease_btn, true);
@@ -240,11 +235,15 @@ void HollyGym::Refresh() {
 void HollyGym::RemoveSelection() {
   if (active_selection != nullptr) {
     if (active_selection->metric == METRIC_MACHINE) {
-      lv_obj_add_style(active_selection->btn, LV_BTN_PART_MAIN, &btn_style_bordercover);
-    } else {
-      lv_obj_set_style_local_bg_opa(active_selection->btn, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+      lv_obj_add_style(machine_btns[active_selection->pos], LV_BTN_PART_MAIN, &btn_style_bordercover);
+      lv_obj_set_style_local_text_color(machine_labels[active_selection->pos], LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x640748));
+    } else if (active_selection->metric == METRIC_REPS) {
+      lv_obj_set_style_local_bg_opa(reps_btns[active_selection->pos], LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+      lv_obj_set_style_local_text_color(reps_labels[active_selection->pos], LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x640748));
+    } else if (active_selection->metric == METRIC_WEIGHT) {
+      lv_obj_set_style_local_bg_opa(weight_btns[active_selection->pos], LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+      lv_obj_set_style_local_text_color(weight_labels[active_selection->pos], LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x640748));
     }
-    lv_obj_set_style_local_text_color(active_selection->label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x640748));
     active_selection = nullptr;
   }
 }
@@ -253,11 +252,15 @@ void HollyGym::SetSelection(Selection* selection) {
   if (selection != nullptr) {
     RemoveSelection();
     if (selection->metric == METRIC_MACHINE) {
-      lv_obj_add_style(selection->btn, LV_BTN_PART_MAIN, &btn_style);
-    } else {
-      lv_obj_set_style_local_bg_opa(selection->btn, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_100);
+      lv_obj_add_style(machine_btns[selection->pos], LV_BTN_PART_MAIN, &btn_style);
+      lv_obj_set_style_local_text_color(machine_labels[selection->pos], LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xDE4C4A));
+    } else if (selection->metric == METRIC_REPS) {
+      lv_obj_set_style_local_bg_opa(reps_btns[selection->pos], LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_100);
+      lv_obj_set_style_local_text_color(reps_labels[selection->pos], LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xDE4C4A));
+    } else if (selection->metric == METRIC_WEIGHT) {
+      lv_obj_set_style_local_bg_opa(weight_btns[selection->pos], LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_100);
+      lv_obj_set_style_local_text_color(weight_labels[selection->pos], LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xDE4C4A));
     }
-    lv_obj_set_style_local_text_color(selection->label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xDE4C4A));
     active_selection = selection;
   }
 }
@@ -271,53 +274,48 @@ void HollyGym::OnButtonEvent(lv_obj_t* object, lv_event_t event, Selection* sele
       current_page++;
       RemoveSelection();
     } else if (object == increase_btn) {
-      if (active_selection->metric == METRIC_REPS) {
-        if (gymData.reps[active_selection->idx] < 99) {
-          gymData.reps[active_selection->idx] += 1;
-        }
-      } else if (active_selection->metric == METRIC_WEIGHT) {
-        if (gymData.reps[active_selection->idx] < 97.0) {
-          gymData.weights[active_selection->idx] += 2.5;
-        }
-      } else if (active_selection->metric == METRIC_MACHINE) {
-        if (active_selection->idx < machine_amount - 1) {
-          uint8_t tmp = gymData.order[active_selection->idx];
-          gymData.order[active_selection->idx] = gymData.order[active_selection->idx + 1];
-          gymData.order[active_selection->idx + 1] = tmp;
+      uint8_t selected_idx = (current_page * machines_per_page) + active_selection->pos;
 
-          Selection* new_selection = &selections[active_selection->idx + 1];
-          if (new_selection->idx % machines_per_page == 0) {
-            RemoveSelection();
-          } else {
-            SetSelection(new_selection);
-          }
+      if (active_selection->metric == METRIC_REPS) {
+        gymData.reps[selected_idx] += 1;
+      } else if (active_selection->metric == METRIC_WEIGHT) {
+        gymData.weights[selected_idx] += weight_increments;
+      } else if (active_selection->metric == METRIC_MACHINE) {
+        uint8_t tmp = gymData.order[selected_idx];
+        gymData.order[selected_idx] = gymData.order[selected_idx + 1];
+        gymData.order[selected_idx + 1] = tmp;
+
+        Selection* moved_selection = &selections[active_selection->pos + 1];
+        if (moved_selection->pos == 0) {
+          // Item moved out of page
+          RemoveSelection();
+        } else {
+          SetSelection(moved_selection);
         }
       }
     } else if (object == decrease_btn) {
-      if (active_selection->metric == METRIC_REPS) {
-        if (gymData.reps[active_selection->idx] > 0) {
-          gymData.reps[active_selection->idx] -= 1;
-        }
-      } else if (active_selection->metric == METRIC_WEIGHT) {
-        if (gymData.weights[active_selection->idx] > 2.0) {
-          gymData.weights[active_selection->idx] -= 2.5;
-        }
-      } else if (active_selection->metric == METRIC_MACHINE) {
-        if (active_selection->idx > 0) {
-          uint8_t tmp = gymData.order[active_selection->idx];
-          gymData.order[active_selection->idx] = gymData.order[active_selection->idx - 1];
-          gymData.order[active_selection->idx - 1] = tmp;
+      uint8_t selected_idx = (current_page * machines_per_page) + active_selection->pos;
 
-          Selection* new_selection = &selections[active_selection->idx - 1];
-          if (new_selection->idx % machines_per_page == machines_per_page - 1) {
-            RemoveSelection();
-          } else {
-            SetSelection(new_selection);
-          }
+      if (active_selection->metric == METRIC_REPS) {
+        gymData.reps[selected_idx] -= 1;
+      } else if (active_selection->metric == METRIC_WEIGHT) {
+        gymData.weights[selected_idx] -= weight_increments;
+      } else if (active_selection->metric == METRIC_MACHINE) {
+        uint8_t tmp = gymData.order[selected_idx];
+        gymData.order[selected_idx] = gymData.order[selected_idx - 1];
+        gymData.order[selected_idx - 1] = tmp;
+
+        Selection* moved_selection = &selections[active_selection->pos - 1];
+        if (moved_selection->pos == machines_per_page - 1) {
+          // Item moved out of page
+          RemoveSelection();
+        } else {
+          SetSelection(moved_selection);
         }
       }
     } else {
       if (active_selection == selection) {
+        // Same selectable clicked again - deselect
         RemoveSelection();
       } else {
         SetSelection(selection);

@@ -53,10 +53,10 @@ Clock::Clock(DisplayApp* app,
         case 4:
           return WatchFaceTerminalScreen();
           break;
-        case 4:
+        case 5:
           return WatchFaceInfineatScreen();
           break;
-        case 5:
+        case 6:
           return WatchFaceCasioStyleG7710();
           break;
       }
@@ -112,7 +112,7 @@ std::unique_ptr<Screen> Clock::WatchFaceTerminalScreen() {
                                                       dateTimeController,
                                                       batteryController,
                                                       bleController,
-                                                      notificatioManager,
+                                                      notificationManager,
                                                       settingsController,
                                                       heartRateController,
                                                       motionController);
@@ -146,7 +146,7 @@ std::unique_ptr<Screen> Clock::WatchFaceHollyScreen() {
                                                      dateTimeController,
                                                      batteryController,
                                                      bleController,
-                                                     notificatioManager,
+                                                     notificationManager,
                                                      settingsController,
                                                      heartRateController,
                                                      motionController);

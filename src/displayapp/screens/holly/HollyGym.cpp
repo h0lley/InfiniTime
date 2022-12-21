@@ -55,7 +55,7 @@ HollyGym::HollyGym(DisplayApp* app, Pinetime::Controllers::FS& fs)
 
     // Machine name
     lv_obj_t* machine_btn = lv_btn_create(lv_scr_act(), nullptr);
-    //lv_obj_set_event_cb(machine_btn, SelectionEventHandler);
+    lv_obj_set_event_cb(machine_btn, SelectionEventHandler);
     lv_obj_add_style(machine_btn, LV_BTN_PART_MAIN, &btn_style_bordercover);
     lv_obj_set_size(machine_btn, 92, 34);
     lv_obj_align(machine_btn, nullptr, LV_ALIGN_IN_TOP_RIGHT, -141, y_offset - 4);
@@ -149,6 +149,11 @@ HollyGym::HollyGym(DisplayApp* app, Pinetime::Controllers::FS& fs)
   lv_label_set_text_static(labeled_decrease_btn, "-");
   lv_obj_set_style_local_text_color(labeled_decrease_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xDE4C4A));
 
+  // Initial order mapping when not loaded from storage
+  for (uint8_t i = 0; i < machine_amount; i++) {
+    gymData.order[i] = i;
+  }
+
   LoadGymDataFromFile();
   Refresh();
 }
@@ -188,9 +193,9 @@ void HollyGym::Refresh() {
   for (uint8_t i = 0; i < machines_per_page; i++) {
     uint8_t entry_idx = (current_page * machines_per_page) + i;
 
-    lv_label_set_text_static(machine_labels[i], machine_names[entry_idx]);
-    lv_label_set_text_fmt(reps_labels[i], "%dx", gymData.reps[entry_idx]);
-    lv_label_set_text_fmt(weight_labels[i], "%.1fkg", gymData.weights[entry_idx]);
+    lv_label_set_text_static(machine_labels[i], machine_names[gymData.order[entry_idx]]);
+    lv_label_set_text_fmt(reps_labels[i], "%dx", gymData.reps[gymData.order[entry_idx]]);
+    lv_label_set_text_fmt(weight_labels[i], "%.1fkg", gymData.weights[gymData.order[entry_idx]]);
 
     Selection* machine_selection = &selections[entry_idx];
     machine_selection->idx = entry_idx;
@@ -221,13 +226,24 @@ void HollyGym::Refresh() {
   lv_obj_set_hidden(prev_btn, current_page == 0 ? true : false);
   lv_obj_set_hidden(next_btn, current_page == machine_amount / machines_per_page - 1 ? true : false);
 
-  lv_obj_set_hidden(increase_btn, !active_selection);
-  lv_obj_set_hidden(decrease_btn, !active_selection);
+  if (active_selection) {
+    lv_obj_set_hidden(increase_btn,
+      active_selection->metric == METRIC_MACHINE && active_selection->idx == machine_amount - 1);
+    lv_obj_set_hidden(decrease_btn,
+      active_selection->metric == METRIC_MACHINE && active_selection->idx == 0);
+  } else {
+    lv_obj_set_hidden(increase_btn, true);
+    lv_obj_set_hidden(decrease_btn, true);
+  }
 }
 
 void HollyGym::RemoveSelection() {
   if (active_selection != nullptr) {
-    lv_obj_set_style_local_bg_opa(active_selection->btn, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+    if (active_selection->metric == METRIC_MACHINE) {
+      lv_obj_add_style(active_selection->btn, LV_BTN_PART_MAIN, &btn_style_bordercover);
+    } else {
+      lv_obj_set_style_local_bg_opa(active_selection->btn, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+    }
     lv_obj_set_style_local_text_color(active_selection->label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x640748));
     active_selection = nullptr;
   }
@@ -236,7 +252,11 @@ void HollyGym::RemoveSelection() {
 void HollyGym::SetSelection(Selection* selection) {
   if (selection != nullptr) {
     RemoveSelection();
-    lv_obj_set_style_local_bg_opa(selection->btn, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_100);
+    if (selection->metric == METRIC_MACHINE) {
+      lv_obj_add_style(selection->btn, LV_BTN_PART_MAIN, &btn_style);
+    } else {
+      lv_obj_set_style_local_bg_opa(selection->btn, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_100);
+    }
     lv_obj_set_style_local_text_color(selection->label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xDE4C4A));
     active_selection = selection;
   }
@@ -256,8 +276,21 @@ void HollyGym::OnButtonEvent(lv_obj_t* object, lv_event_t event, Selection* sele
           gymData.reps[active_selection->idx] += 1;
         }
       } else if (active_selection->metric == METRIC_WEIGHT) {
-        if (gymData.reps[active_selection->idx] < 99.5) {
-          gymData.weights[active_selection->idx] += 0.5;
+        if (gymData.reps[active_selection->idx] < 97.0) {
+          gymData.weights[active_selection->idx] += 2.5;
+        }
+      } else if (active_selection->metric == METRIC_MACHINE) {
+        if (active_selection->idx < machine_amount - 1) {
+          uint8_t tmp = gymData.order[active_selection->idx];
+          gymData.order[active_selection->idx] = gymData.order[active_selection->idx + 1];
+          gymData.order[active_selection->idx + 1] = tmp;
+
+          Selection* new_selection = &selections[active_selection->idx + 1];
+          if (new_selection->idx % machines_per_page == 0) {
+            RemoveSelection();
+          } else {
+            SetSelection(new_selection);
+          }
         }
       }
     } else if (object == decrease_btn) {
@@ -266,8 +299,21 @@ void HollyGym::OnButtonEvent(lv_obj_t* object, lv_event_t event, Selection* sele
           gymData.reps[active_selection->idx] -= 1;
         }
       } else if (active_selection->metric == METRIC_WEIGHT) {
-        if (gymData.weights[active_selection->idx] > 0.0) {
-          gymData.weights[active_selection->idx] -= 0.5;
+        if (gymData.weights[active_selection->idx] > 2.0) {
+          gymData.weights[active_selection->idx] -= 2.5;
+        }
+      } else if (active_selection->metric == METRIC_MACHINE) {
+        if (active_selection->idx > 0) {
+          uint8_t tmp = gymData.order[active_selection->idx];
+          gymData.order[active_selection->idx] = gymData.order[active_selection->idx - 1];
+          gymData.order[active_selection->idx - 1] = tmp;
+
+          Selection* new_selection = &selections[active_selection->idx - 1];
+          if (new_selection->idx % machines_per_page == machines_per_page - 1) {
+            RemoveSelection();
+          } else {
+            SetSelection(new_selection);
+          }
         }
       }
     } else {
@@ -289,8 +335,10 @@ void HollyGym::LoadGymDataFromFile() {
   if (fs.FileOpen(&gymDataFile, "/gym.dat", LFS_O_RDONLY) != LFS_ERR_OK) {
     return;
   }
+
   fs.FileRead(&gymDataFile, reinterpret_cast<uint8_t*>(&bufferGymData), sizeof(gymData));
   fs.FileClose(&gymDataFile);
+
   if (bufferGymData.version == gymDataVersion) {
     gymData = bufferGymData;
   }
@@ -302,6 +350,7 @@ void HollyGym::SaveGymDataToFile() {
   if (fs.FileOpen(&gymDataFile, "/gym.dat", LFS_O_WRONLY | LFS_O_CREAT) != LFS_ERR_OK) {
     return;
   }
+
   fs.FileWrite(&gymDataFile, reinterpret_cast<uint8_t*>(&gymData), sizeof(gymData));
   fs.FileClose(&gymDataFile);
 }

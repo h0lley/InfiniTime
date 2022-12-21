@@ -94,7 +94,7 @@ HollyApps::HollyApps(DisplayApp* app) : Screen(app) {
   lv_obj_set_size(btn6, 85, 53);
   lv_obj_align(btn6, nullptr, LV_ALIGN_IN_BOTTOM_RIGHT, -30, -30);
   lv_obj_t* labeled_btn6 = lv_label_create(btn6, nullptr);
-  lv_label_set_text_static(labeled_btn6, Symbols::highlight);
+  lv_label_set_text_static(labeled_btn6, Symbols::flashlight);
   lv_obj_set_style_local_text_color(labeled_btn6, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xF6B662));
   lv_obj_set_style_local_text_font(labeled_btn6, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_sys_48);
 }

@@ -446,7 +446,7 @@ void DisplayApp::LoadApp(Apps app, DisplayApp::FullRefreshDirections direction) 
       break;
 
     case Apps::HollyGym:
-      currentScreen = std::make_unique<Screens::HollyGym>(this, fs);
+      currentScreen = std::make_unique<Screens::HollyGym>(this, filesystem);
       ReturnApp(Apps::Clock, FullRefreshDirections::RightAnim, TouchEvents::SwipeLeft);
       break;
 

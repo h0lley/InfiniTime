@@ -49,7 +49,7 @@ namespace Pinetime {
 
         uint8_t current_page = 0;
 
-        static const uint8_t machine_amount = 28;
+        static const uint8_t machine_amount = 40; // when changed, GymData version needs to be upped
         static const uint8_t machines_per_page = 4;
 
         std::array<Selection, machine_amount * 3> selections;
@@ -60,31 +60,52 @@ namespace Pinetime {
           "Should.",
           "Lw.back",
           "Up.back",
-          "Chest",
+          "ChstPrs",
+
           "Biceps",
-          "Squads",
+          "LegPrs.",
+          "Corner?",
+          "-",
+
+          "-",
+          "-",
+          "-",
+          "-",
+
+          "1",
+          "2",
+          "3",
+          "4",
+
+          "5",
+          "6",
           "7",
           "8",
+
           "9",
           "10",
           "11",
           "12",
+
           "13",
           "14",
           "15",
           "16",
+
           "17",
           "18",
           "19",
           "20",
+
           "21",
           "22",
           "23",
           "24",
-          "25",
-          "26",
-          "27",
-          "28",
+
+          "-",
+          "-",
+          "-",
+          "-",
         };
 
         std::array<lv_obj_t*, machines_per_page> machine_labels;
@@ -99,11 +120,12 @@ namespace Pinetime {
         lv_obj_t* increase_btn;
         lv_obj_t* decrease_btn;
 
-        static constexpr uint32_t gymDataVersion = 0x0001;
+        static constexpr uint32_t gymDataVersion = 0x0002;
         struct GymData {
           uint32_t version = gymDataVersion;
           std::array<uint8_t, machine_amount> reps = {};
           std::array<float, machine_amount> weights = {};
+          std::array<uint8_t, machine_amount> order = {};
         } gymData;
       };
     }

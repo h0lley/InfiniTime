@@ -74,7 +74,7 @@ HollySettings::HollySettings(Pinetime::Applications::DisplayApp* app,
   lv_obj_align(brightness_btn, nullptr, LV_ALIGN_IN_BOTTOM_LEFT, 35, -35);
   labeled_brightness_btn = lv_label_create(brightness_btn, nullptr);
   lv_label_set_text_static(labeled_brightness_btn, brightness.GetIcon());
-  lv_obj_set_style_local_text_font(labeled_brightness_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_sys_80);
+  lv_obj_set_style_local_text_font(labeled_brightness_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_sys_48);
   lv_obj_set_style_local_text_color(labeled_brightness_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x009D7B));
 
   // More configs button
@@ -86,7 +86,7 @@ HollySettings::HollySettings(Pinetime::Applications::DisplayApp* app,
   lv_obj_align(more_configs_btn, nullptr, LV_ALIGN_IN_BOTTOM_RIGHT, -35, -35);
   lv_obj_t* labeled_more_configs_btn = lv_label_create(more_configs_btn, nullptr);
   lv_label_set_text_static(labeled_more_configs_btn, Symbols::settings);
-  lv_obj_set_style_local_text_font(labeled_more_configs_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_sys_80);
+  lv_obj_set_style_local_text_font(labeled_more_configs_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &lv_font_sys_48);
   lv_obj_set_style_local_text_color(labeled_more_configs_btn, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x009D7B));
 }
 
